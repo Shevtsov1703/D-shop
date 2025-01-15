@@ -1,1 +1,134 @@
+CREATE TABLE IF NOT EXISTS "status" (
+  "status_id" INT NOT NULL PRIMARY KEY,
+  "name" VARCHAR(10) NOT NULL
+);
 
+INSERT INTO status (status_id, name) VALUES
+(1, 'Normal'),  /*-- любой зарегистрировавшийся */
+(2, 'VIP'),     /*-- вип клиент*/
+(3, 'New'),     /*-- новый заказ*/
+(4, 'Cancelled'),/* -- заказ отменен клиентом (удалил все из корзины)*/
+(5, 'Disbanded'), /*-- для тайм-аута нахождения в заказе (системно удалили зарезрвированные продукты из корзины)*/
+(6, 'Paid'),    /*-- оплачен*/
+(7, 'Returned'); /*-- возврат покупателя заказа*/
+
+/* Создание таблицы Клиентах.*/
+CREATE TABLE IF NOT EXISTS client (
+  client_id SERIAL PRIMARY KEY,  /* Автоинкрементный идентификатор клиента */
+  last_name VARCHAR(50) NOT NULL, 
+  first_name VARCHAR(50) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE, 
+  client_status_id INT NOT NULL DEFAULT 1, 
+  client_amout_order DECIMAL(8,2) NOT NULL DEFAULT 0.00,
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  FOREIGN KEY (client_status_id) REFERENCES status (status_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+/* Создание уникального индекса для таблицы Клиент по полю emai*/
+CREATE UNIQUE INDEX email_unique ON client (email);
+
+INSERT INTO client (last_name, first_name, email, client_status_id)
+VALUES
+('Ivanov', 'Ivan', 'ivanov@example.com', DEFAULT),
+('Petrov', 'Petr', 'petrov@example.com', DEFAULT),
+('Sidorov', 'Sidr', 'sidorov@example.com', DEFAULT),
+('Nikolaev', 'Nikolay', 'nikolaev@example.com', DEFAULT),
+('Fedorov', 'Fedor', 'fedorov@example.com', DEFAULT),
+('Smirnov', 'Sergey', 'smirnov@example.com', DEFAULT),
+('Kozlov', 'Kirill', 'kozlov@example.com', DEFAULT),
+('Markov', 'Mark', 'markov@example.com', DEFAULT),
+('Orlov', 'Oleg', 'orlov@example.com', DEFAULT),
+('Yakovlev', 'Yakov', 'yakovlev@example.com', DEFAULT);
+
+/* Создание таблицы product_group*/
+CREATE TABLE IF NOT EXISTS product_group (
+  product_group_id INT NOT NULL,               
+  group_name VARCHAR(255) NOT NULL,             
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (product_group_id)
+);
+
+
+INSERT INTO product_group (product_group_id, group_name, create_time)
+VALUES
+(1, 'Молоко', CURRENT_TIMESTAMP),
+(2, 'Сыр', CURRENT_TIMESTAMP),
+(3, 'Творог', CURRENT_TIMESTAMP),
+(4, 'Масло сливочное', CURRENT_TIMESTAMP),
+(5, 'Йогурт', CURRENT_TIMESTAMP),
+(6, 'Кефир', CURRENT_TIMESTAMP),
+(7, 'Творожные сырки', CURRENT_TIMESTAMP),
+(8, 'Плавленный сыр', CURRENT_TIMESTAMP),
+(9, 'Молочная сыворотка', CURRENT_TIMESTAMP),
+(10, 'Сгущеное молоко', CURRENT_TIMESTAMP);
+
+
+CREATE TABLE IF NOT EXISTS product (
+  product_id SERIAL PRIMARY KEY,               
+  product_group_id INT NOT NULL,             
+  product_name VARCHAR(50) NOT NULL,           
+  start_price DECIMAL(5,2) NOT NULL,          
+  discount DECIMAL(5,2) DEFAULT 0.00,          
+  price_with_discount DECIMAL(8,2) GENERATED ALWAYS AS (start_price - (start_price / 100 * discount)) STORED, 
+  product_char_code VARCHAR(8) NOT NULL,       
+  count_of_products_warehouse DECIMAL(8,3) NOT NULL, 
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  CONSTRAINT fk_product_group1               
+    FOREIGN KEY (product_group_id)
+    REFERENCES product_group (product_group_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+CREATE INDEX fk_product_group1_idx ON product (product_group_id);
+
+
+INSERT INTO product (product_group_id, product_name, start_price, discount, product_char_code, count_of_products_warehouse, create_time, update_time)
+VALUES
+(1, 'Милкавита 3,5%', 1.99, 2.00, 'SPH001', 150, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(1, 'Простоквашино 3,5%', 2.99, 2.00, 'SPH002', 20, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(1, 'Простоквашино 1,2%', 2.99, 5.00, 'SPH003', 150, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(1, 'Простоквашино 2,5%', 2.99, 8.00, 'SPH004', 450, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Милкавита 45,5%', 51.99, 2.00, 'SPH011', 125, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Простоквашино 44,5%', 52.99, 2.00, 'SPH012', 128, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Простоквашино 46,2%', 52.99, 5.00, 'SPH013', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Простоквашино 44,5%', 42.99, 8.00, 'SPH014', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Молочные горки 38,5%', 51.99, 2.00, 'SPH015', 190, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Ляховичок 40,5%', 41.99, 1.00, 'SPH016', 58, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'ГМЗ 2,5%', 5.99, 2.00, 'SPH0021', 155.22, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'Милкавита 5,5%', 5.99, 2.00, 'SPH022', 10.13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'Простоквашино 4,5%', 4.99, 2.00, 'SPH023', 8.123, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'Простоквашино 4,2%', 3.99, 5.00, 'SPH024', 0.115, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'ГМЗ 5,5%', 4.99, 2.00, 'SPH0031', 2.590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+select * from product p;
+select * from client;
+
+
+INSERT INTO product (product_group_id, product_name, start_price, discount, product_char_code, count_of_products_warehouse, create_time, update_time)
+VALUES
+(1, 'Милкавита 3,8%', 1.99, 2.00, 'SPH054', 150, now(), now());
+
+/*Создание таблицы client_order для хранения заказов клиентов.*/
+CREATE TABLE IF NOT EXISTS client_order (
+  client_cart_id SERIAL PRIMARY KEY,          
+  client_id INT NOT NULL,                      
+  client_cart_status_id INT NOT NULL DEFAULT 3,/* Статус корзины клиента, по умолчанию 3 */
+  client_cart_sum DECIMAL(8,2) NOT NULL DEFAULT 0.00,
+  update_time TIMESTAMP NULL,                  
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  CONSTRAINT fk_client_order /* Ограничение внешнего ключа fk_client_order:  Проверяет наличие клиента */
+    FOREIGN KEY (client_id)
+    REFERENCES client (client_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+   CONSTRAINT fk_client_order_status /* проверка наличиястатуса корзины */
+    FOREIGN KEY (client_cart_status_id)
+    REFERENCES status (status_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
