@@ -1,1 +1,60 @@
+{
+  "metadata": {
+    "event_id": "550e8400-e29b-41d4-a716-446655440000",
+    "event_type": "ORDER_CREATED",
+    "event_version": "1.0",
+    "event_timestamp": "2025-01-12T14:30:00.000Z",
+    "producer": "order-management-service"
+  },
+  "payload": {
+    "order": {
+      "order_id": "ORD-2025-01-12-123456",
+      "customer": {
+        "customer_id": "CUST-789012",
+        "email": "ivanoff1488@gmail.com",
+        "phone": "+375-29-672-88-71"
+      },
+      "items": [
+        {
+          "product_id": "PROD-789526",
+          "product_name": "Простоквашино 3,2",
+          "quantity": 1,
+          "unit_price": 3.20,
+          "subtotal": 3.20
+        },
+        {
+          "product_id": "PROD-445566",
+          "product_name": "Милкавита 3,5%",
+          "quantity": 2,
+          "unit_price": 3.00,
+          "subtotal": 6.00
+        }
+      ],
+      "pricing": {
+        "subtotal": 9.20,
+        "shipping_cost": 1.00,
+        "tax": 1.00,
+        "total": 11.20
+      },
+      "shipping": {
+        "address": {
+          "street": "ул. Мира, 15",
+          "city": "Минск",
+          "postal_code": "220090",
+          "country": "Беларусь"
+        },
+        "method": "EXPRESS",
+        "estimated_delivery": "2025-01-14"
+      },
+      "payment": {
+        "method": "CREDIT_CARD",
+        "status": "PENDING",
+        "transaction_id": "TRX-889900"
+      },
+      "status": "CREATED",
+      "created_at": "2025-01-12T14:30:00.000Z",
+      "updated_at": "2025-01-12T14:30:00.000Z"
+    }
+  }
+}
 
